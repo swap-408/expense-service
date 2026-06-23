@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -36,6 +37,13 @@ public class ExpenseServiceImpl implements ExpenseService {
         expense.setCategory(expenseDto.getCategory());
         expense.setDescription(expenseDto.getDescription());
         expense.setExpenseDate(expenseDto.getExpenseDate());
+        String email =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getName();
+
+        expense.setUserEmail(email);
 
         Expense saved = expenseRepository.save(expense);
         ExpenseDto response = toDto(saved);
@@ -45,13 +53,22 @@ public class ExpenseServiceImpl implements ExpenseService {
     @Override
     public Page<ExpenseDto> getAllExpenses(int page, int size, String sortBy) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
-        return expenseRepository.findAll(pageable)
+
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        return expenseRepository.findByUserEmail(email, pageable)
                 .map(this::toDto);
     }
 
     @Override
     public ExpenseDto getExpense(Long id) {
-        Expense expense = expenseRepository.findById(id)
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        Expense expense = expenseRepository.findByIdAndUserEmail(id, email)
                 .orElseThrow(() -> new ExpenseNotFoundException(id));
 
         return toDto(expense);
@@ -61,7 +78,11 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     public ExpenseDto updateExpense(Long id, ExpenseDto expenseDto) {
 
-        Expense expense = expenseRepository.findById(id)
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        Expense expense = expenseRepository.findByIdAndUserEmail(id, email)
                 .orElseThrow(() -> new ExpenseNotFoundException(id));
 
         expense.setAmount(expenseDto.getAmount());
@@ -76,7 +97,11 @@ public class ExpenseServiceImpl implements ExpenseService {
 
 
     public List<ExpenseDto> getExpensesByCategory(String category) {
-        return expenseRepository.findByCategory(category)
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        return expenseRepository.findByCategoryAndUserEmail(category, email)
                 .stream()
                 .map(this::toDto)
                 .toList();
@@ -84,7 +109,11 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     public List<ExpenseDto> getExpensesBySource(String source) {
-        return expenseRepository.findBySource(source)
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        return expenseRepository.findBySourceAndUserEmail(source, email)
                 .stream()
                 .map(this::toDto)
                 .toList();
@@ -92,7 +121,11 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     public List<ExpenseDto> getExpensesByExpenseDate(LocalDate expenseDate) {
-        return expenseRepository.findByExpenseDate(expenseDate)
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        return expenseRepository.findByExpenseDateAndUserEmail(expenseDate, email)
                 .stream()
                 .map(this::toDto)
                 .toList();
@@ -100,7 +133,11 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     public List<ExpenseDto> getExpensesByDateRange(LocalDate startDate, LocalDate endDate) {
-        return expenseRepository.findByExpenseDateBetween(startDate, endDate)
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        return expenseRepository.findByExpenseDateBetweenAndUserEmail(startDate, endDate, email)
                 .stream()
                 .map(this::toDto)
                 .toList();
@@ -109,7 +146,11 @@ public class ExpenseServiceImpl implements ExpenseService {
     @Override
     public void deleteExpense(Long id){
 
-        Expense expense = expenseRepository.findById(id)
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        Expense expense = expenseRepository.findByIdAndUserEmail(id, email)
                 .orElseThrow(() -> new ExpenseNotFoundException(id));
 
         expenseRepository.delete(expense);
@@ -117,7 +158,11 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     public List<ExpenseDto> getExpensesByMerchant(String merchant) {
-        return expenseRepository.findByMerchant(merchant)
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        return expenseRepository.findByMerchantAndUserEmail(merchant,email)
                 .stream()
                 .map(this::toDto)
                 .toList();
@@ -125,21 +170,33 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     public BigDecimal getTotalSpent() {
-        return expenseRepository.getTotalSpent();
+
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+        return expenseRepository.getTotalSpent(email);
     }
 
     @Override
     public BigDecimal getMonthlySpent(int year, int month) {
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
         YearMonth yearMonth = YearMonth.of(year, month);
         LocalDate startDate = yearMonth.atDay(1);
         LocalDate endDate = yearMonth.atEndOfMonth();
 
-        return expenseRepository.getTotalSpentBetween(startDate, endDate);
+        return expenseRepository.getTotalSpentBetween(startDate, endDate, email);
     }
 
     @Override
     public List<CategorySummaryDto> getCategorySummary() {
-        List<Object[]> results = expenseRepository.getCategoryWiseTotals();
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        List<Object[]> results = expenseRepository.getCategoryWiseTotals(email);
 
         return results.stream()
                 .map(row -> new CategorySummaryDto(
@@ -150,7 +207,11 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
     public List<MerchantSummaryDto> getMerchantSummary() {
-        List<Object[]> results = expenseRepository.getMerchantWiseTotals();
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        List<Object[]> results = expenseRepository.getMerchantWiseTotals(email);
 
         return results.stream()
                 .map(row -> new MerchantSummaryDto(
@@ -162,7 +223,11 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     public BigDecimal getSpentBetween(LocalDate startDate, LocalDate endDate) {
-        return expenseRepository.getTotalSpentBetween(startDate, endDate);
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
+        return expenseRepository.getTotalSpentBetween(startDate, endDate, email);
     }
 
 
