@@ -17,21 +17,31 @@ public class ExpenseDto {
 
     private Long id;
 
-    @NotNull(message = "Amount is required")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Amount must be greater than 0")
+    private String userEmail;
+
     private BigDecimal amount;
 
-    @NotBlank(message = "Currency is required")
     private String currency;
 
-    @NotBlank(message = "Merchant is required")
     private String merchant;
 
-    @NotBlank(message = "Category is required")
     private String category;
 
     private String description;
 
-    @NotNull(message = "Expense date is required")
     private LocalDate expenseDate;
+
+    private String source;
+
+    private String rawMessage;
+
+    private String transactionType;
+
+    private String bank;
+
+    private String last4;
+
+    private String transactionDateTime;
+
+    private Double confidence;
 }

@@ -30,24 +30,30 @@ public class ExpenseServiceImpl implements ExpenseService {
     @Override
     public ExpenseDto createExpense(ExpenseDto expenseDto) {
 
+        String email = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+
         Expense expense = new Expense();
+
         expense.setAmount(expenseDto.getAmount());
         expense.setCurrency(expenseDto.getCurrency());
         expense.setMerchant(expenseDto.getMerchant());
         expense.setCategory(expenseDto.getCategory());
         expense.setDescription(expenseDto.getDescription());
         expense.setExpenseDate(expenseDto.getExpenseDate());
-        String email =
-                SecurityContextHolder
-                        .getContext()
-                        .getAuthentication()
-                        .getName();
-
+        expense.setSource(expenseDto.getSource());
+        expense.setRawMessage(expenseDto.getRawMessage());
+        expense.setTransactionType(expenseDto.getTransactionType());
+        expense.setBank(expenseDto.getBank());
+        expense.setLast4(expenseDto.getLast4());
+        expense.setTransactionDateTime(expenseDto.getTransactionDateTime());
+        expense.setConfidence(expenseDto.getConfidence());
         expense.setUserEmail(email);
 
         Expense saved = expenseRepository.save(expense);
-        ExpenseDto response = toDto(saved);
-        return response;
+
+        return toDto(saved);
     }
 
     @Override
@@ -253,12 +259,20 @@ public class ExpenseServiceImpl implements ExpenseService {
         ExpenseDto dto = new ExpenseDto();
 
         dto.setId(expense.getId());
+        dto.setUserEmail(expense.getUserEmail());
         dto.setAmount(expense.getAmount());
         dto.setCurrency(expense.getCurrency());
         dto.setMerchant(expense.getMerchant());
         dto.setCategory(expense.getCategory());
         dto.setDescription(expense.getDescription());
         dto.setExpenseDate(expense.getExpenseDate());
+        dto.setSource(expense.getSource());
+        dto.setRawMessage(expense.getRawMessage());
+        dto.setTransactionType(expense.getTransactionType());
+        dto.setBank(expense.getBank());
+        dto.setLast4(expense.getLast4());
+        dto.setTransactionDateTime(expense.getTransactionDateTime());
+        dto.setConfidence(expense.getConfidence());
 
         return dto;
     }

@@ -18,7 +18,7 @@ public class Expense {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long userId;
+
     private String userEmail;
 
     private BigDecimal amount;
@@ -35,9 +35,16 @@ public class Expense {
 
     private String source;
 
-    private String rawMessageId;
+    @Column(length = 5000)
+    private String rawMessage;
 
-    private LocalDateTime createdAt;
+    private String transactionType;
 
-    private LocalDateTime updatedAt;
+    private String bank;
+
+    private String last4;
+
+    private String transactionDateTime;
+
+    private Double confidence;
 }
