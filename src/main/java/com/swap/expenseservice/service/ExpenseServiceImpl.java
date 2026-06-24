@@ -230,6 +230,22 @@ public class ExpenseServiceImpl implements ExpenseService {
         return expenseRepository.getTotalSpentBetween(startDate, endDate, email);
     }
 
+    @Override
+    public ExpenseDto createExpenseFromSms(String userEmail, ExpenseDto expenseDto) {
+        Expense expense = new Expense();
+        expense.setUserEmail(userEmail);
+        expense.setAmount(expenseDto.getAmount());
+        expense.setCurrency("INR");
+        expense.setMerchant(expenseDto.getMerchant());
+        expense.setCategory(expenseDto.getCategory());
+        expense.setDescription(expenseDto.getDescription());
+        expense.setExpenseDate(expenseDto.getExpenseDate());
+        expense.setSource("SMS");
+
+        Expense saved = expenseRepository.save(expense);
+        return toDto(saved);
+    }
+
 
 
     private ExpenseDto toDto(Expense expense) {

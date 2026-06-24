@@ -28,4 +28,6 @@ public interface ExpenseService {
     List<CategorySummaryDto> getCategorySummary();
     List<MerchantSummaryDto> getMerchantSummary();
     BigDecimal getSpentBetween(LocalDate startDate, LocalDate endDate);
+
+    ExpenseDto createExpenseFromSms(String userEmail, ExpenseDto expenseDto);
 }
